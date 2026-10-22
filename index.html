@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#f7c7ad">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="쫑이의 엄마 찾기">
+  <meta name="description" content="쫑이가 뼈다귀를 모으며 장애물을 뛰어넘고 엄마를 만나는 귀여운 점프 게임">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
+  <link rel="icon" href="./assets/icon-180.png">
+  <link rel="stylesheet" href="./style.css">
+  <title>쫑이의 엄마 찾기 🐾</title>
+</head>
+<body>
+  <main id="game" class="game-shell" aria-label="쫑이의 엄마 찾기 게임">
+    <canvas id="scene" aria-label="쫑이가 달리는 게임 화면"></canvas>
+    <div class="sun-flare" aria-hidden="true"></div>
+
+    <header id="hud" class="hud is-hidden" aria-label="게임 정보">
+      <div class="hud-top">
+        <div class="hud-scores"><div class="score-line"><span class="score-star">✦</span><strong id="score">0</strong><small>점</small></div><div class="best-line">최고 <span id="best">0</span></div></div>
+        <div id="hearts" class="hearts" aria-label="남은 하트 5개">♥♥♥♥♥</div>
+        <div class="hud-actions"><button id="sound-btn" class="icon-button" aria-label="효과음 끄기" title="효과음">♫</button><button id="pause-btn" class="icon-button" aria-label="일시 정지" title="일시 정지">Ⅱ</button></div>
+      </div>
+      <div class="progress-track"><div id="progress-fill" class="progress-fill"></div><span id="progress-paw" class="progress-paw">🐾</span><span class="progress-home">♥</span></div>
+    </header>
+
+    <div id="jump-hint" class="jump-hint is-hidden">화면을 톡! 누르면 점프! <span>↑</span></div>
+    <button id="jump-btn" class="jump-btn is-hidden" aria-label="점프">JUMP <span>↗</span></button>
+    <div id="toast" class="toast" aria-live="polite"></div>
+    <div id="float-layer" class="float-layer" aria-hidden="true"></div>
+
+    <section id="start" class="overlay start-overlay" aria-label="게임 시작">
+      <div class="start-sparkle sparkle-a">✦</div><div class="start-sparkle sparkle-b">♡</div><div class="start-sparkle sparkle-c">✧</div>
+      <div class="title-kicker">♡ 쫑이의 작은 모험 ♡</div>
+      <h1>엄마를<br><span>만나러 가요!</span></h1>
+      <div class="hero-wrap"><div class="hero-halo"></div><img src="./assets/jjong-5.webp" alt="신나게 점프하는 쫑이" class="hero-dog" draggable="false"><div class="hero-heart">♥</div></div>
+      <div class="start-card">
+        <p class="intro">천천히 달리며 장애물을 <b>폴짝!</b> 뛰어넘고<br>뼈다귀를 모아 엄마를 만나러 가자 🐾</p>
+        <div class="tip-row"><span>👆 화면 터치 = 점프</span><span>👆👆 두 번 = 이단 점프</span></div>
+        <div class="legend-title">뼈다귀별 점수 <span>✦</span></div>
+        <div class="legend" aria-label="뼈다귀 종류별 점수">
+          <div><img src="./assets/bone-0.webp" alt="기본 뼈다귀">+10</div>
+          <div><img src="./assets/bone-4.webp" alt="쿠키 뼈다귀">+20</div>
+          <div><img src="./assets/bone-2.webp" alt="리본 뼈다귀">+30</div>
+          <div><img src="./assets/bone-1.webp" alt="황금 뼈다귀">+50</div>
+          <div><img src="./assets/bone-3.webp" alt="보석 뼈다귀">+120</div>
+          <div><img src="./assets/bone-5.webp" alt="전설 뼈다귀">+200</div>
+        </div>
+        <button id="rank-start" class="secondary-btn" type="button">🏆 전체 랭킹 TOP 10</button>
+        <button id="start-btn" class="primary-btn" type="button"><span>🐾</span> 쫑이 출발!</button>
+        <div class="start-footnote">쉬운 난이도 ♡ 하트 5개 · 약 30초의 모험</div>
+      </div>
+    </section>
+
+    <section id="pause" class="overlay modal-overlay is-hidden" aria-label="일시 정지">
+      <div class="dialog"><div class="dialog-emoji">💤</div><h2>잠깐 쉬었다 가자!</h2><p>엄마가 기다리고 있어 ♥</p><button id="resume-btn" class="primary-btn">계속 달리기</button><button id="restart-paused-btn" class="secondary-btn">처음부터 다시</button></div>
+    </section>
+
+    <section id="gameover" class="overlay modal-overlay is-hidden" aria-label="게임 종료">
+      <div class="dialog"><div class="dialog-emoji">🐶</div><h2>쫑이, 다시 도전!</h2><p>괜찮아! 엄마가 기다리고 있어 ♡</p><div class="result-score">이번 점수 <strong id="lost-score">0</strong>점</div><button id="retry-btn" class="primary-btn">다시 달리기 🐾</button></div>
+    </section>
+
+    <section id="ending" class="overlay ending-overlay is-hidden" aria-label="엄마를 만났어요 게임 성공">
+      <img src="./assets/ending.webp" alt="엄마를 만났어요! 쫑이가 엄마의 품으로 달려가며 기뻐하는 모습. 다시하기 버튼이 보이는 엔딩 화면" class="ending-art" draggable="false">
+      <div class="ending-scores" aria-live="polite"><span>모은 뼈다귀 점수</span> <b id="final-score">0</b><span>점</span></div>
+      <div class="rank-submit"><input id="rank-name" maxlength="12" placeholder="닉네임 (최대 12자)" aria-label="랭킹 닉네임"><button id="rank-submit-btn" type="button">🏆 기록 등록</button><button id="rank-end" type="button">전체 랭킹</button><p id="rank-message" role="status"></p></div>
+      <button id="ending-retry" type="button" aria-label="다시하기" class="ending-retry"></button>
+    </section>
+    <section id="rank-modal" class="rank-modal is-hidden" role="dialog" aria-modal="true" aria-label="전체 랭킹">
+      <div class="rank-panel"><button id="rank-close" type="button" class="rank-close" aria-label="닫기">✕</button><h2>🏆 쫑이 랭킹 TOP 10</h2><p class="rank-note">엄마를 만난 친구들의 최고 기록!</p><ol id="rank-list" class="rank-list"><li>랭킹 불러오는 중…</li></ol><button id="rank-refresh" type="button">🔄 새로고침</button><p id="rank-status" role="status"></p></div>
+    </section>
+  </main>
+  <script src="./leaderboard-config.js"></script>
+  <script src="./leaderboard.js" defer></script>
+  <script src="./game.js" defer></script>
+  <script>if('serviceWorker' in navigator && location.protocol==='https:') window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));</script>
+</body>
+</html>
